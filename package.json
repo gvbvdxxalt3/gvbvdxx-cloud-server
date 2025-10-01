@@ -1,0 +1,13 @@
+{
+  "name": "gvbvdxx-cloud-server",
+  "version": "0.1.0",
+  "description": "For a scratch extension",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "http": "^0.0.0"
+  }
+}
