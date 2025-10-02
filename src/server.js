@@ -36,14 +36,14 @@ function runStaticStuff(req, res, forceStatus) {
   fs.createReadStream(file).pipe(res);
 }
 
-var server = http.createServer((req,res) => {
-  runStaticStuff(req,res);
+var server = http.createServer((req, res) => {
+  runStaticStuff(req, res);
 });
 
 var managerScript = require("./custom-manager-script.js");
-managerScript(wss._gvbvdxxCloudServer,wss);
+managerScript(wss._gvbvdxxCloudServer, wss);
 
-server.on("upgrade", function upgrade(request, socket, head) {  
+server.on("upgrade", function upgrade(request, socket, head) {
   wss.handleUpgrade(request, socket, head, function done(ws) {
     wss.emit("connection", ws, request);
   });

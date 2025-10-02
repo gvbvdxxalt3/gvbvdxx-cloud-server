@@ -1,6 +1,60 @@
 var ws = require("ws");
 
 var wss = new ws.WebSocketServer({ noServer: true });
+
+function terminateGhostSockets(ws) {
+  var isAlive = true;
+  var terminated = false;
+
+  function heartbeat() {
+    isAlive = true;
+  }
+
+  ws.on("pong", heartbeat);
+
+  var interval = setInterval(() => {
+    if (!isAlive) {
+      if (!terminated) {
+        terminated = true;
+        clearInterval(interval);
+        ws.terminate();
+        //ws.emit("close");
+      }
+      return;
+    }
+
+    isAlive = false;
+    try {
+      ws.ping();
+    } catch (err) {
+      if (!terminated) {
+        terminated = true;
+        clearInterval(interval);
+        ws.terminate();
+        //ws.emit("close");
+      }
+    }
+  }, 1500); // Check every 1500 miliseconds.
+
+  ws.on("close", () => {
+    if (!terminated) {
+      terminated = true;
+      clearInterval(interval);
+    }
+  });
+
+  try {
+    ws.ping();
+  } catch (err) {
+    // Socket might already be broken
+    if (!terminated) {
+      terminated = true;
+      clearInterval(interval);
+      ws.terminate();
+    }
+  }
+}
+
 var idNumber = 0;
 var globalVariables = {};
 
@@ -79,7 +133,7 @@ var cs = {
       }
     }
   },
-  onGlobalEvent: function (name,value,from) {}
+  onGlobalEvent: function (name, value, from) {},
 };
 
 wss.on("connection", (ws) => {
@@ -180,7 +234,7 @@ wss.on("connection", (ws) => {
         }
       }
       if (json.type == "globalEventSend") {
-        cs.onGlobalEvent(json.name,json.value,ws.localID);
+        cs.onGlobalEvent(json.name, json.value, ws.localID);
         sendMessageToAllClients(
           JSON.stringify({
             type: "globalEvent",
@@ -213,6 +267,8 @@ wss.on("connection", (ws) => {
     wsOpen = false;
     sendNewUserlist();
   });
+
+  terminateGhostSockets(ws);
 });
 
 setInterval(() => {
