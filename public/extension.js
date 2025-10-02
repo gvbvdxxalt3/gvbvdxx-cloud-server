@@ -271,7 +271,7 @@
                 id: extid,
                 name: "Gvbvdxx Cloud",
                 menus: {
-				    settings:{
+				    settings: {
 					    acceptReporters: false,
 					    items: [
                             {
@@ -280,7 +280,7 @@
                             }
                         ]
                     }
-                }
+                },
                 blocks: [
                     {
                         opcode: "__NOUSEOPCODE",
