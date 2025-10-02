@@ -54,6 +54,8 @@
             this.requestedToConnect = false;
             this.inConnectLoop = false;
             
+            this.disconnectOnProjectStop = false;
+            
             this.currentClientData = {};
             this.globalEventsReceived = {};
             this.localEventsReceived = {};
@@ -69,6 +71,11 @@
                 for (var name of Object.keys(t.localEventsReceived)) {
                     t.localEventsReceived[name] = false;
                 }
+            });
+            runtime.on('PROJECT_STOP_ALL', function () {
+                 if (t.disconnectOnProjectStop) {
+                    this._closeConnectLoop();
+                 }
             });
             
             t._resetClientData = function () {
@@ -263,6 +270,17 @@
             return {
                 id: extid,
                 name: "Gvbvdxx Cloud",
+                menus: {
+				    settings:{
+					    acceptReporters: false,
+					    items: [
+                            {
+                                text: "Disconnect on project stop",
+                                value: "OnProjectStop"
+                            }
+                        ]
+                    }
+                }
                 blocks: [
                     {
                         opcode: "__NOUSEOPCODE",
@@ -562,6 +580,33 @@
                         arguments: {
                         },
                     },
+                    "---",
+                    {
+                        opcode: "setClientSetting",
+                        blockType: BlockType.COMMAND,
+                        text: "Set setting [SETTING] to [VALUE]",
+                        arguments: {
+                            SETTING:  {
+                                acceptReporters: false,
+                                menu: "settings",
+                            },
+                            VALUE: {
+                                type: ArgumentType.BOOLEAN,
+                                defaultValue: false
+                            }
+                        }
+                    },
+                    {
+                        opcode: "getClientSetting",
+                        blockType: BlockType.REPORTER,
+                        text: "Get setting [SETTING]",
+                        arguments: {
+                            SETTING:  {
+                                acceptReporters: false,
+                                menu: "settings",
+                            }
+                        }
+                    }
                 ]
             };
         }
@@ -790,6 +835,24 @@
                 return clidata.variables[id][name];
             }
             return "";
+        }
+
+        setClientSetting (args) {
+            var setting = Cast.toString(args.SETTING);
+            var value = Cast.toBoolean(args.VALUE);
+
+            if (setting == "OnProjectStop") {
+                this.disconnectOnProjectStop = value;
+            }
+        }
+
+        getClientSetting (args) {
+            var setting = Cast.toString(args.SETTING);
+
+            if (setting == "OnProjectStop") {
+                return this.disconnectOnProjectStop;
+            }
+            return false;
         }
     }
 
