@@ -74,7 +74,7 @@
             });
             runtime.on('PROJECT_STOP_ALL', function () {
                  if (t.disconnectOnProjectStop) {
-                    this._closeConnectLoop();
+                    t._closeConnectLoop();
                  }
             });
             
